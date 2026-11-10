@@ -2,13 +2,30 @@
 
 Demostración educativa para el Instituto Tecnológico de Celaya. Gestor de archivos inspirado en el patrón de una unidad en la nube. Proyecto independiente, sin relación con Google Drive.
 
-## Arquitectura
+## Arquitectura principal: Workers Free
 
-- React + Vite en Vercel.
-- API Express en Render.
-- Supabase Auth y Postgres con Row Level Security por propietario.
-- Archivos privados en Cloudflare R2. Descargas mediante enlaces de 60 segundos.
+- React + Vite en Vercel Hobby.
+- API en Cloudflare Workers Free (`worker/index.js`).
+- Supabase Auth y Postgres con RLS por propietario.
+- Archivos privados en R2 mediante binding nativo `BUCKET` limitado a `ciisti-drive`.
 - DNS de `ciisti.sakuranet.mx` en Cloudflare.
+
+La cuenta Render exigió verificar tarjeta incluso para Free. La API principal se adaptó a Workers; el servidor Express se conserva como alternativa.
+
+## Publicación con Workers (ruta elegida)
+
+1. Crea el proyecto Supabase Free y ejecuta `supabase.sql` una vez. Crea dos usuarios de ensayo con correos bajo tu control y contraseñas ingresadas por ti. La app tiene inicio de sesión, no registro.
+2. Activa R2 y crea el bucket privado `ciisti-drive` en Standard. Mantén deshabilitado el acceso público. R2 requiere facturación aunque incluya cuotas gratuitas.
+3. Completa `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` y `ALLOWED_ORIGINS` en `wrangler.jsonc`. El binding `BUCKET` apunta solo a `ciisti-drive`. No usar claves S3 ni service_role.
+4. Ejecuta `npx wrangler login` y autoriza tú la cuenta. Publica con `npx wrangler deploy`. Alternativamente pega un bundle de `worker/index.js` y sus importaciones en el editor del panel.
+5. Comprueba `/health` en la URL real workers.dev: debe devolver ok y runtime cloudflare-workers. `/api/entries` sin sesión debe responder 401.
+6. Importa el repo en Vercel: Vite, build `npm run build`, output `dist`, Hobby. Define `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` y `VITE_API_URL` (URL HTTPS real del Worker). Son valores públicos incorporados al compilar; cambiar variables requiere nuevo despliegue. También puedes subir el frontend ya compilado con esos valores mediante el flujo de archivos de Vercel.
+7. Añade `ciisti.sakuranet.mx` en Domains de Vercel. Busca primero si existe el registro. Crea únicamente CNAME `ciisti` hacia el destino exacto del proyecto, inicialmente DNS only. No cambiar otros registros.
+8. Configura ALLOWED_ORIGINS del Worker con los orígenes HTTPS exactos, separados por coma, sin barra final ni comodines. Verifica dos usuarios, carga, descarga, persistencia y HTTPS.
+
+Cargas y descargas pasan por Workers con sesión verificada. La API conserva RLS al consultar con el token del usuario. No requiere CORS del bucket; sí CORS exacto del backend. R2 no cobra egreso directo; Workers conserva sus cuotas de CPU y solicitudes (Free: 100,000/día, 10 ms CPU/invocación). El límite de 60 solicitudes por usuario/minuto vive en memoria del isolate y no es global ni persistente.
+
+Las secciones Render siguientes describen una variante alternativa; no son pasos adicionales del despliegue principal.
 
 ## Inicio local
 
@@ -37,7 +54,7 @@ npm run build
 
 También se incluye `pnpm-lock.yaml`. Vercel detectará ese gestor y usará las versiones resueltas. El ejemplo de instalación de Render usa npm para mantener los pasos sencillos. Para fijar también su instalación, genera y conserva un package-lock.json o configura pnpm con su archivo de bloqueo.
 
-## Publicación
+## Variante de publicación: Node / Render
 
 1. Crea un proyecto Supabase Free. Ejecuta `supabase.sql` una vez. En Authentication > Users crea al menos dos usuarios de prueba desde el panel con correos bajo tu control y contraseñas que ingreses tú. La app solo tiene inicio de sesión. Puedes cerrar el alta pública en Supabase para esta demo.
 2. En Cloudflare activa R2 y crea el bucket **privado** `ciisti-drive`, clase Standard. Crea credenciales S3 con lectura/escritura limitadas solo a ese bucket. Nunca uses una clave global de la cuenta.
@@ -66,4 +83,4 @@ Los únicos valores públicos del frontend son URL de Supabase, su clave publica
 
 El código se prepara para publicar en las cuentas del ponente. La existencia de archivos de configuración no demuestra que los servicios estén desplegados. Consultar el estado real del despliegue y las verificaciones de nube en el mensaje de entrega.
 
-La credencial R2 autorizada para esta demostración vence el 16 de noviembre de 2026. Para mantener la app después de esa fecha, el propietario debe renovar una credencial con el mismo alcance limitado y actualizar únicamente los secretos de Render.
+La credencial S3 temporal preparada para Render no se usa en Workers. Su vencimiento no afecta al binding nativo. Si se usa la variante Render, renovar únicamente esa credencial limitada y actualizar sus secretos.

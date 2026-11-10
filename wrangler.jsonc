@@ -1,0 +1,12 @@
+{
+  "name": "ciisti-drive-api",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-11-09",
+  "workers_dev": true,
+  "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "ciisti-drive" }],
+  "vars": {
+    "SUPABASE_URL": "",
+    "SUPABASE_PUBLISHABLE_KEY": "",
+    "ALLOWED_ORIGINS": "https://ciisti.sakuranet.mx,http://localhost:5173"
+  }
+}

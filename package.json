@@ -1,1 +1,26 @@
-{"name":"celaya-drive","version":"1.0.0","private":true,"type":"module","engines":{"node":">=22"},"scripts":{"dev":"vite --host 127.0.0.1","build":"vite build","start":"node server/index.js","test":"node --test server/security.test.js"},"dependencies":{"@aws-sdk/client-s3":"^3.0.0","@aws-sdk/s3-request-presigner":"^3.0.0","@supabase/supabase-js":"^2.0.0","express":"^5.0.0","react":"^19.0.0","react-dom":"^19.0.0"},"devDependencies":{"vite":"^7.0.0"}}
+{
+  "name": "celaya-drive",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "start": "node server/index.js",
+    "test": "node --test server/security.test.js worker/security.test.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/s3-request-presigner": "^3.0.0",
+    "@supabase/supabase-js": "^2.0.0",
+    "express": "^5.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
