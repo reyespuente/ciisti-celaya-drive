@@ -1,4 +1,4 @@
-# Celaya Drive
+# CIISTI
 
 Demostración educativa para el Instituto Tecnológico de Celaya. Gestor de archivos inspirado en el patrón de una unidad en la nube. Proyecto independiente, sin relación con Google Drive.
 
